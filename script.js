@@ -2,23 +2,40 @@ const todoContainer = document.querySelector(".todo-input-container");
 const inputText = document.getElementById("todoInput");
 const addTodoBtn = document.getElementById("addTodoBtn");
 const todoListUl = document.getElementById("todoList");
-let remaining = document.getElementById('remaining-count')
+let remaining = document.getElementById("remaining-count");
 let todoText; // for getting input value.
 let todos = []; //we use todos to get item because it will became empty after the pages refreshs
-// populating all the todos on the todolist ul
 
+// populating all the todos on the todolist ul
 let todosString = localStorage.getItem("todos");
 if (todosString) {
   todos = JSON.parse(todosString);
+  remaining.innerHTML = todos.filter((item) => {
+    return item.isCompleted != true;
+  }).length;
 }
 //storing in localstorage
 function saveTodos() {
   localStorage.setItem("todos", JSON.stringify(todos));
 }
 
+let currentFilter = "all"; //filtering the todos
 const populatetodos = () => {
+   //===============adding filter functionality===========
+   
+
+  let filterTodo = todos;
+  if (currentFilter === "active") {
+    filterTodo = todos.filter(todo => !todo.isCompleted);
+  }
+
+  if (currentFilter === "completed") {
+    filterTodo = todos.filter(todo => todo.isCompleted);
+  }
+
+  //=============== filter functionality ends===========
   let string = "";
-  for (const todo of todos) {
+  for (const todo of filterTodo) {
     string += `<li id="todo-${todo.id}" class="todoitem ${todo.isCompleted ? "completed" : ""}">
                 <input type="checkbox" class="todo-checkbox" ${todo.isCompleted ? "checked" : ""}>
                 <span class="todo-text">${todo.title}</span>
@@ -26,7 +43,8 @@ const populatetodos = () => {
             </li>`;
   }
   todoListUl.innerHTML = string;
-  // adding delete todos functionality
+
+  // ===========adding delete todos functionality==================
   const deleteBtn = document.querySelectorAll(".delete-btn");
   deleteBtn.forEach((element) => {
     element.addEventListener("click", (e) => {
@@ -41,7 +59,8 @@ const populatetodos = () => {
       }
     });
   });
-  //adding checkbox funtionality
+  // =============delete funtionality ends =========================
+  //===================adding checkbox funtionality====================
   let todoCheckBoxes = document.querySelectorAll(".todo-checkbox");
   todoCheckBoxes.forEach((element) => {
     element.addEventListener("click", (e) => {
@@ -57,8 +76,8 @@ const populatetodos = () => {
           }
         });
         remaining.innerHTML = todos.filter((item) => {
-          return item.isCompleted != true
-        }).length
+          return item.isCompleted != true;
+        }).length;
         saveTodos();
       } else {
         element.parentNode.classList.remove("completed");
@@ -71,20 +90,23 @@ const populatetodos = () => {
             return todo;
           }
         });
- remaining.innerHTML = todos.filter((item) => {
-          return item.isCompleted != true
-        }).length
+        remaining.innerHTML = todos.filter((item) => {
+          return item.isCompleted != true;
+        }).length;
         saveTodos();
       }
     });
   });
-
+  //=================checkbox functionlity ends ===========================
+ 
 };
+// ========populate todos ends===============
+
 //storing input value to local storage when button is clicked.
 addTodoBtn.addEventListener("click", () => {
   todoText = inputText.value;
   if (todoText.trim().length < 4) {
-    alert('Please enter a valid task!');
+    alert("Please enter a valid task!");
     return;
   }
   inputText.value = ""; // clearing previos value
@@ -95,12 +117,15 @@ addTodoBtn.addEventListener("click", () => {
   };
 
   todos.push(todo);
+  remaining.innerHTML = todos.filter((item) => {
+    return item.isCompleted != true;
+  }).length;
   saveTodos();
   populatetodos();
 });
 populatetodos(); // adding todoes list to the screen
 
-// clearing the task complete task list
+// ===============clearing the task complete task list==================
 const clearCompleteBtn = document.getElementById("clearCompleteBtn");
 clearCompleteBtn.addEventListener("click", (e) => {
   console.log("You clicked me!");
@@ -112,11 +137,12 @@ clearCompleteBtn.addEventListener("click", (e) => {
   populatetodos();
 });
 
-//adding filter of add, active and completed
+//=======================adding filter of add, active and completed===================
 
 const filterBtn = document.querySelectorAll(".filter-btn");
-filterBtn.forEach((element) => {
-  element.addEventListener("click", (e) => {
-    console.log(e);
+filterBtn.forEach((button) => {
+  button.addEventListener("click", (e) => {
+    currentFilter = e.currentTarget.dataset.filter;
+    populatetodos();
   });
 });
